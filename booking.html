@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book a Haircut | TZ Barber Shop</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="site-header">
+        <a class="brand" href="index.html">TZ Barber Shop</a>
+        <nav class="site-nav">
+            <a class="nav-link" href="index.html">Home</a>
+            <a class="nav-link active" href="booking.html">Booking</a>
+            <a class="nav-link" href="about.html">About</a>
+            
+        </nav>
+    </header>
+
+    <main class="page-shell">
+        <section class="page-intro">
+            <p class="eyebrow">Choose your style &amp; time</p>
+            <h1>Book Your Haircut Slot</h1>
+            <p>A hnuaiah hian i duh hun tak thlang rawh leee.</p>
+        </section>
+
+        <section class="booking-grid">
+            <div class="panel">
+                <div class="panel-head">
+                    <h2>Available Slots</h2>
+                    <button id="refreshButton" class="ghost-button" type="button">Refresh</button>
+                </div>
+                <div id="slotStatus" class="status-line">Loading today's schedule...</div>
+                <div id="slots" class="slots-grid"></div>
+            </div>
+
+            <div class="panel">
+                <h2>Booking Details</h2>
+                <form id="bookingForm" class="booking-form">
+                    <label for="customerName">Your name</label>
+                    <input id="customerName" name="customerName" type="text" placeholder="Enter your name" required>
+
+                    <label for="bookingDate">Booking date</label>
+                    <input id="bookingDate" name="bookingDate" type="date" required>
+
+                    <label for="haircutStyle">Hair style</label>
+                    <select id="haircutStyle" name="haircutStyle" required>
+                        <option value="">Select a hair style</option>
+                        <option value="Fade">Fade</option>
+                        <option value="Taper">Taper</option>
+                        <option value="Buzz Cut">Buzz Cut</option>
+                        <option value="Crew Cut">Mullett</option>
+                        <option value="Pompadour">Mormal</option>
+                        <option value="Textured Crop">Edgar</option>
+                        <option value="Textured Crop">Hair dye</option>
+                    </select>
+                    <div class="style-picker" aria-label="Choose a hairstyle visually">
+                        <button class="style-option" type="button" data-style="Fade">
+                            <img src="images/fade.png" alt="Fade hairstyle">
+                            <span>Fade</span>
+                        </button>
+                        <button class="style-option" type="button" data-style="Taper">
+                            <img src="images/Taper.png" alt="Taper hairstyle">
+                            <span>Taper</span>
+                        </button>
+                        <button class="style-option" type="button" data-style="Buzz Cut">
+                            <img src="images/Buz.png" alt="Buzz cut">
+                            <span>Buzz Cut</span>
+                        </button>
+                        <button class="style-option" type="button" data-style="Crew Cut">
+                            <img src="images/Mullet.png" alt="Crew cut">
+                            <span>Mullet Cut</span>
+                        </button>
+                        <button class="style-option" type="button" data-style="Pompadour">
+                            <img src="images/Edgar.png" alt="Pompadour hairstyle">
+                            <span>Edgar Cut</span>
+                        </button>
+                        <button class="style-option" type="button" data-style="Textured Crop">
+                            <img src="images/Normal.png" alt="Textured crop hairstyle">
+                            <span>Normal Cut</span>
+                        </button>
+                    </div>
+
+                    <label for="selectedSlot">Selected slot</label>
+                    <input id="selectedSlot" name="selectedSlot" type="text" placeholder="Choose a time slot" readonly required>
+
+                    <div class="price-summary">
+                        <span>Price</span>
+                        <span class="price-amount">₹200 <small>per person</small></span>
+                    </div>
+
+                    <button id="bookButton" class="primary-button" type="submit" disabled>Confirm Booking — ₹200</button>
+                </form>
+                <p id="bookingMessage" class="booking-message" aria-live="polite"></p>
+            </div>
+
+            <div class="panel booking-services">
+                <h2>Popular Hair Styles</h2>
+                <div class="style-list">
+                    <div class="style-item">
+                        <img src="images/fade.png" alt="Fade haircut illustration">
+                        <strong>Fade</strong>
+                        <span>Clean blend from short sides into the top.</span>
+                    </div>
+                    <div class="style-item">
+                        <img src="images/Taper.png" alt="Taper haircut illustration">
+                        <strong>Taper</strong>
+                        <span>Subtle narrowing around the neckline and sideburns.</span>
+                    </div>
+                    <div class="style-item">
+                        <img src="images/Buz.png" alt="Buzz cut illustration">
+                        <strong>Buzz Cut</strong>
+                        <span>Low-maintenance cut with an even clipped length.</span>
+                    </div>
+                   
+                   
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>H&amp;J Solution @2026 All right reserved</p>
+        <p>I duh hun thlang la, i meh duh dan nen, tichuan a hun takah rawn thleng bawk ang che.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

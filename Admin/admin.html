@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login | H&J Solution</title>
+    <script>
+    // ── Admin Password Gate ──────────────────────────────────
+    (function() {
+        const ADMIN_KEY = 'hj_admin_auth';
+        const CORRECT_PASSWORD = '1234567809'; // Change this to your preferred password
+
+        function isAuthenticated() {
+            return sessionStorage.getItem(ADMIN_KEY) === 'true';
+        }
+
+        if (!isAuthenticated()) {
+            document.addEventListener('DOMContentLoaded', function() {
+                // Hide the entire body content
+                document.body.style.display = 'none';
+
+                const overlay = document.createElement('div');
+                overlay.id = 'admin-gate';
+                overlay.style.cssText = `
+                    position: fixed; inset: 0; z-index: 99999;
+                    background: #0f0a01;
+                    display: flex; align-items: center; justify-content: center;
+                    font-family: 'DM Sans', 'Segoe UI', sans-serif;
+                    background-image: radial-gradient(ellipse at 10% 0%, rgba(212,160,23,0.12) 0%, transparent 50%),
+                                      radial-gradient(ellipse at 90% 100%, rgba(156,116,12,0.10) 0%, transparent 50%);
+                `;
+
+                overlay.innerHTML = `
+                    <div style="
+                        background: rgba(255,215,50,0.05);
+                        border: 1px solid rgba(212,160,23,0.25);
+                        border-radius: 20px;
+                        padding: 2.5rem 2rem;
+                        width: min(380px, calc(100vw - 2rem));
+                        box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+                        text-align: center;
+                    ">
+                        <div style="
+                            font-family: 'Playfair Display', Georgia, serif;
+                            font-size: 1.4rem; font-weight: 800;
+                            background: linear-gradient(135deg, #ffe27a, #d4a017);
+                            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+                            background-clip: text; margin-bottom: 0.25rem;
+                        ">H&amp;J Solution</div>
+                        <p style="color:#7a6030; font-size:0.82rem; margin-bottom:1.8rem; letter-spacing:0.05em; text-transform:uppercase;">Admin Access</p>
+
+                        <div style="position:relative; margin-bottom:1rem;">
+                            <input id="gate-pw" type="password" placeholder="Enter admin password"
+                                autocomplete="current-password"
+                                style="
+                                    width: 100%; padding: 0.75rem 1rem;
+                                    background: rgba(255,215,50,0.06);
+                                    border: 1px solid rgba(212,160,23,0.25);
+                                    border-radius: 10px; color: #fef9ec;
+                                    font-size: 0.95rem; font-family: inherit;
+                                    outline: none; transition: border 0.2s;
+                                "
+                                onfocus="this.style.borderColor='rgba(212,160,23,0.6)'"
+                                onblur="this.style.borderColor='rgba(212,160,23,0.25)'"
+                            />
+                        </div>
+
+                        <p id="gate-err" style="color:#e05252; font-size:0.82rem; min-height:1.2em; margin-bottom:0.75rem;"></p>
+
+                        <button id="gate-btn" style="
+                            width: 100%; padding: 0.75rem;
+                            background: linear-gradient(135deg, #f5c842, #d4a017);
+                            color: #0f0a01; font-weight: 700; font-size: 0.95rem;
+                            border: none; border-radius: 10px; cursor: pointer;
+                            font-family: inherit; transition: opacity 0.2s;
+                        " onmouseover="this.style.opacity='0.88'" onmouseout="this.style.opacity='1'">
+                            Enter Dashboard
+                        </button>
+
+                        <p style="margin-top:1.2rem; font-size:0.78rem; color:#7a6030;">
+                            <a href="../index.html" style="color:#c9a84c; text-decoration:none;">← Back to site</a>
+                        </p>
+                    </div>
+                `;
+
+                document.body.appendChild(overlay);
+                document.body.style.display = '';
+
+                const pwInput = document.getElementById('gate-pw');
+                const errMsg  = document.getElementById('gate-err');
+                const btn     = document.getElementById('gate-btn');
+
+                function tryLogin() {
+                    if (pwInput.value === CORRECT_PASSWORD) {
+                        sessionStorage.setItem(ADMIN_KEY, 'true');
+                        overlay.style.transition = 'opacity 0.3s';
+                        overlay.style.opacity = '0';
+                        setTimeout(() => overlay.remove(), 300);
+                    } else {
+                        errMsg.textContent = 'Incorrect password. Please try again.';
+                        pwInput.value = '';
+                        pwInput.style.borderColor = 'rgba(224,82,82,0.7)';
+                        setTimeout(() => pwInput.style.borderColor = 'rgba(212,160,23,0.25)', 1500);
+                        pwInput.focus();
+                    }
+                }
+
+                btn.addEventListener('click', tryLogin);
+                pwInput.addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
+                pwInput.focus();
+            });
+        }
+    })();
+    </script>
+    <title>Admin Dashboard | H&J Solution</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold-1: #f5c842;
+            --gold-2: #d4a017;
+            --gold-3: #9c740c;
+            --gold-4: #6b4f08;
+            --gold-shine: #ffe27a;
+            --bg: #0f0a01;
+            --bg-2: #1a1205;
+            --bg-3: #251a08;
+            --surface: rgba(255, 215, 50, 0.06);
+            --surface-hover: rgba(255, 215, 50, 0.10);
+            --ink: #fef9ec;
+            --ink-muted: #c9a84c;
+            --ink-dim: #7a6030;
+            --border: rgba(212, 160, 23, 0.20);
+            --border-bright: rgba(212, 160, 23, 0.45);
+            --danger: #e05252;
+            --danger-dim: rgba(224, 82, 82, 0.12);
+            --success: #4caf7d;
+            --success-dim: rgba(76, 175, 125, 0.12);
+            --shadow-deep: 0 24px 60px rgba(0, 0, 0, 0.5);
+            --radius: 18px;
+            --radius-sm: 10px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--ink);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-image:
+                radial-gradient(ellipse at 10% 0%, rgba(212,160,23,0.12) 0%, transparent 50%),
+                radial-gradient(ellipse at 90% 100%, rgba(156,116,12,0.10) 0%, transparent 50%);
+        }
+
+        a { color: inherit; text-decoration: none; }
+
+        .site-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.1rem 3rem;
+            border-bottom: 1px solid var(--border);
+            background: rgba(15,10,1,0.85);
+            backdrop-filter: blur(20px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--gold-shine), var(--gold-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 0.02em;
+        }
+
+        .site-nav { display: flex; gap: 0.4rem; align-items: center; }
+
+        .nav-link {
+            padding: 0.5rem 1rem;
+            border-radius: 999px;
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: var(--ink-muted);
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover { color: var(--ink); background: var(--surface); }
+
+        .nav-link.active {
+            color: var(--bg);
+            background: linear-gradient(135deg, var(--gold-1), var(--gold-2));
+            font-weight: 700;
+        }
+
+        .admin-shell {
+            width: min(1100px, calc(100% - 4rem));
+            margin: 2.5rem auto 4rem;
+            flex: 1;
+        }
+
+        .page-top {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .page-eyebrow {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+            color: var(--gold-2);
+            margin-bottom: 0.4rem;
+        }
+
+        .page-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.8rem, 4vw, 2.6rem);
+            font-weight: 800;
+            line-height: 1.1;
+            color: var(--ink);
+        }
+
+        .page-title span {
+            background: linear-gradient(135deg, var(--gold-shine), var(--gold-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .controls-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .date-label {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--ink-dim);
+            white-space: nowrap;
+        }
+
+        .date-input {
+            padding: 0.6rem 1rem;
+            border: 1px solid var(--border-bright);
+            border-radius: var(--radius-sm);
+            background: var(--bg-3);
+            color: var(--ink);
+            font: inherit;
+            font-size: 0.9rem;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.2s ease;
+            color-scheme: dark;
+        }
+
+        .date-input:focus { border-color: var(--gold-1); }
+
+        .refresh-btn {
+            padding: 0.6rem 1.2rem;
+            border: 1px solid var(--border-bright);
+            border-radius: var(--radius-sm);
+            background: var(--surface);
+            color: var(--gold-2);
+            font: inherit;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .refresh-btn:hover {
+            background: var(--surface-hover);
+            border-color: var(--gold-1);
+            color: var(--gold-1);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.4rem 1.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(212,160,23,0.06), transparent);
+            pointer-events: none;
+        }
+
+        .stat-card:hover { border-color: var(--border-bright); transform: translateY(-2px); }
+
+        .stat-icon { font-size: 1.4rem; margin-bottom: 0.85rem; display: block; }
+
+        .stat-num {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.4rem;
+            font-weight: 800;
+            line-height: 1;
+            background: linear-gradient(135deg, var(--gold-shine), var(--gold-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.35rem;
+        }
+
+        .stat-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--ink-dim);
+        }
+
+        .table-card {
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-deep);
+        }
+
+        .table-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.3rem 1.75rem;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            background: linear-gradient(135deg, rgba(212,160,23,0.06), transparent);
+        }
+
+        .table-head-left { display: flex; align-items: center; gap: 0.9rem; }
+
+        .table-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--ink);
+        }
+
+        .count-pill {
+            padding: 0.2rem 0.7rem;
+            border-radius: 999px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            background: rgba(212,160,23,0.15);
+            color: var(--gold-2);
+            border: 1px solid rgba(212,160,23,0.25);
+        }
+
+        .status-tag { font-size: 0.82rem; color: var(--ink-dim); }
+
+        .table-wrap { overflow-x: auto; }
+
+        table { width: 100%; border-collapse: collapse; }
+
+        thead tr {
+            background: rgba(212,160,23,0.04);
+            border-bottom: 1px solid var(--border);
+        }
+
+        thead th {
+            padding: 0.85rem 1.5rem;
+            text-align: left;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--ink-dim);
+            white-space: nowrap;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background 0.15s ease;
+        }
+
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: var(--surface-hover); }
+
+        tbody td {
+            padding: 1rem 1.5rem;
+            font-size: 0.93rem;
+            vertical-align: middle;
+        }
+
+        .time-cell {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--gold-1);
+            white-space: nowrap;
+        }
+
+        .customer-cell { font-weight: 600; color: var(--ink); }
+
+        .style-pill {
+            display: inline-block;
+            padding: 0.3rem 0.85rem;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            background: rgba(212,160,23,0.10);
+            color: var(--gold-2);
+            border: 1px solid rgba(212,160,23,0.20);
+        }
+
+        .confirmed-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.3rem 0.85rem;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            background: var(--success-dim);
+            color: var(--success);
+            border: 1px solid rgba(76,175,125,0.25);
+        }
+
+        .confirmed-badge::before { content: '●'; font-size: 0.5rem; }
+
+        .booked-at { font-size: 0.78rem; color: var(--ink-dim); }
+
+        .cancel-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.4rem 0.9rem;
+            border: 1px solid rgba(224,82,82,0.35);
+            border-radius: var(--radius-sm);
+            background: var(--danger-dim);
+            color: var(--danger);
+            font: inherit;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .cancel-btn:hover {
+            background: var(--danger);
+            border-color: var(--danger);
+            color: #fff;
+            transform: scale(1.04);
+        }
+
+        .empty-state { padding: 4rem 2rem; text-align: center; }
+        .empty-icon { font-size: 3rem; margin-bottom: 1rem; display: block; }
+
+        .empty-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--ink-muted);
+            margin-bottom: 0.4rem;
+        }
+
+        .empty-sub { font-size: 0.88rem; color: var(--ink-dim); }
+
+        .site-footer {
+            padding: 1.25rem 3rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            background: rgba(15,10,1,0.6);
+        }
+
+        .site-footer p { font-size: 0.82rem; color: var(--ink-dim); }
+        .site-footer p:first-child { font-weight: 700; color: var(--ink-muted); }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 0.85rem 1.4rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.88rem;
+            font-weight: 600;
+            z-index: 999;
+            transform: translateY(4rem);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            pointer-events: none;
+        }
+
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast.success { background: var(--success-dim); color: var(--success); border: 1px solid rgba(76,175,125,0.3); }
+        .toast.error   { background: var(--danger-dim);  color: var(--danger);  border: 1px solid rgba(224,82,82,0.3); }
+
+        @keyframes shimmer {
+            0%   { background-position: -600px 0; }
+            100% { background-position:  600px 0; }
+        }
+
+        .shimmer-bar {
+            height: 14px;
+            border-radius: 6px;
+            background: linear-gradient(90deg, var(--bg-3) 25%, var(--bg-2) 50%, var(--bg-3) 75%);
+            background-size: 600px 100%;
+            animation: shimmer 1.4s infinite linear;
+        }
+
+        @media (max-width: 900px) {
+            .site-header { padding: 1rem 1.5rem; }
+            .admin-shell { width: calc(100% - 2rem); }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .page-top { flex-direction: column; align-items: flex-start; }
+        }
+
+        @media (max-width: 560px) {
+            .nav-link { padding: 0.45rem 0.7rem; font-size: 0.82rem; }
+            .site-footer { flex-direction: column; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="site-header">
+        <a class="brand" href="/">TZ Barber Shop</a>
+        <nav class="site-nav">
+            <a class="nav-link" href="/">Home</a>
+            <a class="nav-link" href="/booking.html">Booking</a>
+            <a class="nav-link" href="/about.html">About</a>
+            <a class="nav-link active" href="/Admin/admin.html">Admin</a>
+            <button id="notificationBell" class="nav-link" title="New bookings" style="position:relative;">
+                🔔
+                <span id="notifBadge" style="display:none;position:absolute;top:-2px;right:-2px;min-width:16px;height:16px;line-height:16px;border-radius:8px;background:#e05252;color:white;font-size:0.7rem;font-weight:700;text-align:center;">0</span>
+            </button>
+            <button onclick="sessionStorage.removeItem('Tz_admin_auth'); location.href='../index.html';" style="padding:0.5rem 1rem;border-radius:999px;font-size:0.88rem;font-weight:500;background:rgba(224,82,82,0.15);color:#e05252;border:1px solid rgba(224,82,82,0.3);cursor:pointer;font-family:inherit;">Logout</button>
+        </nav>
+        <div id="notificationDropdown" style="position:absolute;top:100%;right:16px;z-index:200;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-sm);min-width:320px;max-height:400px;overflow-y:auto;box-shadow:var(--shadow-deep);display:none;padding:1rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;padding-bottom:0.75rem;border-bottom:1px solid var(--border);">
+                <strong style="font-size:1.1rem;">New Bookings</strong>
+                <button id="markReadBtn" style="padding:0.3rem 0.8rem;background:var(--success-dim);color:var(--success);border:1px solid rgba(76,175,125,0.3);border-radius:6px;font-size:0.85rem;cursor:pointer;">Mark all read</button>
+            </div>
+            <div id="notifList"></div>
+            <p id="notifEmpty" style="text-align:center;color:var(--ink-dim);padding:2rem;font-style:italic;">No new bookings</p>
+        </div>
+    </header>
+
+    <main class="admin-shell">
+
+        <div class="page-top">
+            <div class="page-title-block">
+                <p class="page-eyebrow">✦ Barber Dashboard</p>
+                <h1 class="page-title">Today's <span>Schedule</span></h1>
+            </div>
+            <div class="controls-row">
+                <span class="date-label">Viewing:</span>
+                <input type="date" class="date-input" id="adminDate">
+                <button class="refresh-btn" id="adminRefresh" type="button">↻ Refresh</button>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-icon">✂️</span>
+                <div class="stat-num" id="statBookings">—</div>
+                <div class="stat-label">Bookings</div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-icon">🕐</span>
+                <div class="stat-num" id="statRemaining">—</div>
+                <div class="stat-label">Slots Open</div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-icon">👤</span>
+                <div class="stat-num" id="statNext">—</div>
+                <div class="stat-label">Next Client</div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-icon">📅</span>
+                <div class="stat-num" id="statDay">—</div>
+                <div class="stat-label">Day</div>
+            </div>
+        </div>
+
+        <div class="table-card">
+            <div class="table-head">
+                <div class="table-head-left">
+                    <span class="table-title">Bookings</span>
+                    <span class="count-pill" id="countPill">0</span>
+                </div>
+                <span class="status-tag" id="tableStatus">Loading...</span>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Customer</th>
+                            <th>Hair Style</th>
+                            <th>Status</th>
+                            <th>Booked At</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bookingsBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="site-footer">
+        <p>H&J Solution © 2026</p>
+        <p>Sharp cuts, simple booking, dependable service.</p>
+    </footer>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const TOTAL_SLOTS = 9;
+
+        const adminDateInput = document.getElementById('adminDate');
+        const adminRefresh   = document.getElementById('adminRefresh');
+        const bookingsBody   = document.getElementById('bookingsBody');
+        const tableStatus    = document.getElementById('tableStatus');
+        const countPill      = document.getElementById('countPill');
+        const statBookings   = document.getElementById('statBookings');
+        const statRemaining  = document.getElementById('statRemaining');
+        const statNext       = document.getElementById('statNext');
+        const statDay        = document.getElementById('statDay');
+        const toast          = document.getElementById('toast');
+        const notifBell      = document.getElementById('notificationBell');
+        const notifBadge     = document.getElementById('notifBadge');
+        const notifDropdown  = document.getElementById('notificationDropdown');
+        const notifList      = document.getElementById('notifList');
+        const notifEmpty     = document.getElementById('notifEmpty');
+        const markReadBtn    = document.getElementById('markReadBtn');
+
+        // ── Toast ──────────────────────────────────────────────
+        let toastTimer;
+        const showToast = (msg, type = 'success') => {
+            clearTimeout(toastTimer);
+            toast.textContent = msg;
+            toast.className = `toast ${type} show`;
+            toastTimer = setTimeout(() => toast.classList.remove('show'), 3200);
+        };
+
+        // ── Date helpers ───────────────────────────────────────
+        const todayLocal = () => {
+            const now = new Date();
+            return new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+                .toISOString().split('T')[0];
+        };
+
+        const timeToMinutes = (t) => {
+            const [time, period] = t.split(' ');
+            let [h, m] = time.split(':').map(Number);
+            if (period === 'PM' && h !== 12) h += 12;
+            if (period === 'AM' && h === 12) h = 0;
+            return h * 60 + m;
+        };
+
+        const formatDate = (dateStr) =>
+            new Date(dateStr + 'T12:00:00')
+                .toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+
+        const formatTime = (iso) => {
+            if (!iso) return '—';
+            return new Date(iso).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        };
+
+        const escHtml = (s) => String(s)
+            .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+        // ── Shimmer ────────────────────────────────────────────
+        const showShimmer = () => {
+            bookingsBody.innerHTML = Array.from({ length: 4 }, () => `
+                <tr>
+                    ${Array.from({length:6}, (_, i) =>
+                        `<td style="padding:1.1rem 1.5rem">
+                            <div class="shimmer-bar" style="width:${[70,120,90,80,60,70][i]}px"></div>
+                        </td>`
+                    ).join('')}
+                </tr>
+            `).join('');
+        };
+
+        // ── Load bookings ──────────────────────────────────────
+        const loadBookings = async () => {
+            const date = adminDateInput.value;
+            if (!date) return;
+
+            tableStatus.textContent = 'Loading...';
+            showShimmer();
+
+            try {
+                const res = await fetch(`/api/admin/bookings?date=${date}`);
+                if (!res.ok) throw new Error(`Server error (${res.status})`);
+                const bookings = await res.json();
+
+                // Stats
+                const now      = new Date();
+                const nowMins  = now.getHours() * 60 + now.getMinutes();
+                const isToday  = date === todayLocal();
+                const upcoming = isToday
+                    ? bookings.filter(b => timeToMinutes(b.time) >= nowMins)
+                    : bookings;
+
+                statBookings.textContent  = bookings.length;
+                statRemaining.textContent = TOTAL_SLOTS - bookings.length;
+                statNext.textContent      = upcoming.length ? upcoming[0].time : 'None';
+                statDay.textContent       = new Date(date + 'T12:00:00')
+                    .toLocaleDateString('en-US', { weekday: 'short' });
+                countPill.textContent     = bookings.length;
+                tableStatus.textContent   = `${bookings.length} booking${bookings.length !== 1 ? 's' : ''} found`;
+
+                if (bookings.length === 0) {
+                    bookingsBody.innerHTML = `
+                        <tr><td colspan="6">
+                            <div class="empty-state">
+                                <span class="empty-icon">✂️</span>
+                                <p class="empty-title">No bookings for ${formatDate(date)}</p>
+                                <p class="empty-sub">The schedule is clear — enjoy the free day!</p>
+                            </div>
+                        </td></tr>`;
+                    return;
+                }
+
+                bookingsBody.innerHTML = '';
+                bookings.forEach(b => {
+                    const tr = document.createElement('tr');
+                    tr.dataset.id = b.id;
+                    tr.innerHTML = `
+                        <td class="time-cell">${escHtml(b.time)}</td>
+                        <td class="customer-cell">${escHtml(b.customerName)}</td>
+                        <td><span class="style-pill">${escHtml(b.haircutStyle)}</span></td>
+                        <td><span class="confirmed-badge">Confirmed</span></td>
+                        <td class="booked-at">${formatTime(b.createdAt)}</td>
+                        <td>
+                            <button class="cancel-btn" data-id="${b.id}" type="button">
+                                🗑 Cancel
+                            </button>
+                        </td>`;
+                    bookingsBody.appendChild(tr);
+                });
+
+                bookingsBody.querySelectorAll('.cancel-btn').forEach(btn =>
+                    btn.addEventListener('click', () => cancelBooking(btn.dataset.id, btn))
+                );
+
+            } catch (err) {
+                tableStatus.textContent = 'Failed to load';
+                bookingsBody.innerHTML = `
+                    <tr><td colspan="6">
+                        <div class="empty-state">
+                            <span class="empty-icon">⚠️</span>
+                            <p class="empty-title">Could not connect to server</p>
+                            <p class="empty-sub">${escHtml(err.message)} — make sure the backend is running.</p>
+                        </div>
+                    </td></tr>`;
+                ['statBookings','statRemaining','statNext','statDay']
+                    .forEach(id => document.getElementById(id).textContent = '—');
+            }
+        };
+
+        // ── Cancel ─────────────────────────────────────────────
+        const cancelBooking = async (id, btn) => {
+            if (!confirm('Cancel this booking? This cannot be undone.')) return;
+            btn.disabled    = true;
+            btn.textContent = '...';
+
+            try {
+                const res = await fetch(`/api/admin/bookings/${id}`, { method: 'DELETE' });
+                if (!res.ok) throw new Error('Failed to cancel booking.');
+
+                const row = bookingsBody.querySelector(`tr[data-id="${id}"]`);
+                if (row) {
+                    row.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                    row.style.opacity    = '0';
+                    row.style.transform  = 'translateX(30px)';
+                    setTimeout(loadBookings, 320);
+                } else {
+                    loadBookings();
+                }
+                showToast('Booking cancelled.', 'success');
+            } catch (err) {
+                showToast(err.message, 'error');
+                btn.disabled    = false;
+                btn.textContent = '🗑 Cancel';
+            }
+        };
+
+        // ── Init ───────────────────────────────────────────────
+        adminDateInput.value = todayLocal();
+        adminDateInput.addEventListener('change', loadBookings);
+        adminRefresh.addEventListener('click', loadBookings);
+        loadBookings();
+
+// ── Notification Sound ────────────────────────────────────────
+const playNotifSound = () => {
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const notes = [
+            { freq: 880, start: 0,    dur: 0.12 },
+            { freq: 1108, start: 0.13, dur: 0.12 },
+            { freq: 1320, start: 0.26, dur: 0.22 },
+        ];
+        notes.forEach(({ freq, start, dur }) => {
+            const osc  = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.type = 'sine';
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0, ctx.currentTime + start);
+            gain.gain.linearRampToValueAtTime(0.35, ctx.currentTime + start + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + dur);
+            osc.start(ctx.currentTime + start);
+            osc.stop(ctx.currentTime + start + dur + 0.05);
+        });
+    } catch (e) {
+        console.warn('Audio not available:', e);
+    }
+};
+
+// ── Notification Bell & SSE ───────────────────────────────────
+let unreadNotifications = [];
+let eventSource = null;
+
+const updateNotifUI = () => {
+    const count = unreadNotifications.length;
+    notifBadge.textContent = count;
+    notifBadge.style.display = count > 0 ? 'block' : 'none';
+    notifBell.style.background = count > 0 ? 'rgba(224,82,82,0.2)' : '';
+};
+
+const renderNotifList = () => {
+    if (unreadNotifications.length === 0) {
+        notifEmpty.style.display = 'block';
+        notifList.innerHTML = '';
+        return;
+    }
+    notifEmpty.style.display = 'none';
+    notifList.innerHTML = unreadNotifications.map(b => `
+        <div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem 0;border-bottom:1px solid rgba(212,160,23,0.1);">
+            <div style="font-size:1.1rem;font-weight:700;color:var(--gold-1);min-width:60px;">${b.time}</div>
+            <div style="flex:1;">
+                <div style="font-weight:600;">${escHtml(b.customerName)}</div>
+                <div style="font-size:0.9rem;color:var(--ink-dim);">${escHtml(b.haircutStyle)}</div>
+            </div>
+            <div style="font-size:0.8rem;color:var(--success);font-weight:500;">${formatTime(b.createdAt)}</div>
+        </div>
+    `).join('');
+};
+
+const connectSSE = () => {
+    if (eventSource) { eventSource.close(); eventSource = null; }
+    eventSource = new EventSource('/api/admin/notifications');
+
+    eventSource.onopen = () => {
+        console.log('🔔 SSE connected — live notifications active');
+    };
+
+    eventSource.onmessage = (e) => {
+        // Skip SSE comment lines (heartbeats start with ":" and arrive as empty data)
+        if (!e.data || e.data.trim() === '') return;
+        try {
+            const booking = JSON.parse(e.data);
+            unreadNotifications.unshift(booking);
+            updateNotifUI();
+            playNotifSound();
+            showToast(`New booking: ${booking.customerName} — ${booking.time}`, 'success');
+            loadBookings(); // Refresh table
+        } catch (err) {
+            console.warn('SSE parse error:', err);
+        }
+    };
+
+    eventSource.onerror = (err) => {
+        console.warn('SSE error, reconnecting in 5s...', err);
+        eventSource.close();
+        eventSource = null;
+        setTimeout(connectSSE, 5000);
+    };
+};
+
+notifBell.addEventListener('click', (e) => {
+    e.stopPropagation();
+    notifDropdown.style.display = notifDropdown.style.display === 'block' ? 'none' : 'block';
+    if (notifDropdown.style.display === 'block') {
+        renderNotifList();
+        document.addEventListener('click', closeDropdown);
+    }
+});
+
+const closeDropdown = () => {
+    notifDropdown.style.display = 'none';
+    document.removeEventListener('click', closeDropdown);
+};
+
+markReadBtn.addEventListener('click', () => {
+    unreadNotifications = [];
+    updateNotifUI();
+    renderNotifList();
+    notifDropdown.style.display = 'none';
+});
+
+// Close dropdown on outside click
+document.addEventListener('click', closeDropdown);
+
+// ── Init SSE ─────────────────────────────────────────────────
+// The page is already password-gated; always connect once DOM is ready.
+connectSSE();
+
+// Auto-refresh every 60s
+setInterval(loadBookings, 60_000);
+    </script>
+</body>
+</html>

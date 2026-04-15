@@ -1,0 +1,16 @@
+{
+  "name": "barber-shop-backend",
+  "version": "1.0.0",
+  "description": "Backend for H&J Solution Barber Shop Booking Application",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "body-parser": "^2.2.2",
+    "cors": "^2.8.6",
+    "express": "^4.22.1",
+    "mysql2": "^3.9.7",
+    "twilio": "^5.13.1"
+  }
+}
