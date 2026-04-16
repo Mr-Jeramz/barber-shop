@@ -232,9 +232,17 @@ app.delete('/api/admin/bookings/:id', async (req, res) => {
     }
 });
 
-// Serve frontend
+// ── Clean URL Routes ──────────────────────────────────────────
 app.get('/', (req, res) => {
     res.sendFile(path.join(frontendPath, 'index.html'));
+});
+
+app.get('/booking', (req, res) => {
+    res.sendFile(path.join(frontendPath, 'booking.html'));
+});
+
+app.get('/about', (req, res) => {
+    res.sendFile(path.join(frontendPath, 'about.html'));
 });
 
 app.get('/admin', (req, res) => {
