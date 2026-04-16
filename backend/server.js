@@ -9,7 +9,7 @@ const path    = require('path');
 const TWILIO_ACCOUNT_SID = process.env.TWILIO_SID;
 const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
 const TWILIO_FROM_NUMBER  = '+16812215930';
-const BARBER_PHONE        = '+918413036768';
+const BARBER_PHONE        = '+918415802996';
 
 const twilio = require('twilio')(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 
