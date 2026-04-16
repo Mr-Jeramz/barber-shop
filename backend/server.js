@@ -1,15 +1,15 @@
+require('dotenv').config();
+
 const express = require('express');
 const cors    = require('cors');
 const mysql   = require('mysql2/promise');
 const path    = require('path');
 
 // ── Twilio SMS ────────────────────────────────────────────────
-// 1. Run: npm install twilio
-// 2. Fill in your credentials from https://console.twilio.com
 const TWILIO_ACCOUNT_SID = process.env.TWILIO_SID;
 const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
-const TWILIO_FROM_NUMBER  = '+16812215930';                       // ← your Twilio number
-const BARBER_PHONE        = '+918413036768';                       // ← barber's real phone number
+const TWILIO_FROM_NUMBER  = '+16812215930';
+const BARBER_PHONE        = '+918413036768';
 
 const twilio = require('twilio')(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 
@@ -24,10 +24,12 @@ app.use(express.static(frontendPath));
 
 // ── Database connection pool ──────────────────────────────────
 const pool = mysql.createPool({
-    host:     'localhost',
-    user:     'root',          // ← change to your MySQL username
-    password: '54321',              // ← change to your MySQL password
-    database: 'barber_shop',
+    host:     process.env.HOST,
+    user:     process.env.USER,
+    password: process.env.PASSWORD,
+    database: process.env.DB_NAME,
+    port:     process.env.DB_PORT,
+    ssl:      { rejectUnauthorized: false },
     waitForConnections: true,
     connectionLimit:    10,
 });
@@ -51,16 +53,10 @@ app.get('/api/admin/notifications', (req, res) => {
 
     console.log(`📡 Admin SSE client connected (${sseClients.length})`);
 
-    // Send an initial ping so the client knows the connection is alive
-    res.write(`: connected
+    res.write(`: connected\n\n`);
 
-`);
-
-    // Keepalive heartbeat every 25 seconds to prevent proxy/browser timeouts
     const heartbeat = setInterval(() => {
-        try { res.write(`: heartbeat
-
-`); }
+        try { res.write(`: heartbeat\n\n`); }
         catch (e) { clearInterval(heartbeat); }
     }, 25000);
 
@@ -95,7 +91,6 @@ const emitNewBooking = (booking) => {
 };
 
 // GET /api/slots?date=2026-04-15
-// Returns all slots with available/booked status for the given date
 app.get('/api/slots', async (req, res) => {
     const { date } = req.query;
 
@@ -118,7 +113,6 @@ app.get('/api/slots', async (req, res) => {
             [date]
         );
 
-        // Convert MySQL TINYINT(1) to proper JS boolean
         const slots = rows.map(row => ({
             ...row,
             available: row.available === 1 || row.available === true,
@@ -132,11 +126,9 @@ app.get('/api/slots', async (req, res) => {
 });
 
 // POST /api/book
-// Body: { id, customerName, haircutStyle, bookingDate }
 app.post('/api/book', async (req, res) => {
     const { id, customerName, haircutStyle, bookingDate } = req.body;
 
-    // ── Validation ──────────────────────────────────────────
     if (!id) {
         return res.status(400).json({ message: 'Slot ID is required.' });
     }
@@ -151,13 +143,11 @@ app.post('/api/book', async (req, res) => {
     }
 
     try {
-        // Check the slot exists
         const [[slot]] = await pool.query('SELECT * FROM slots WHERE id = ?', [id]);
         if (!slot) {
             return res.status(404).json({ message: 'Slot not found.' });
         }
 
-        // Check it is not already booked on that date
         const [[existing]] = await pool.query(
             'SELECT id FROM bookings WHERE slot_id = ? AND booking_date = ?',
             [id, bookingDate]
@@ -172,24 +162,19 @@ app.post('/api/book', async (req, res) => {
             [id, bookingDate, String(customerName).trim(), String(haircutStyle).trim()]
         );
 
-        // Fetch new booking details for notification
         const [[newBooking]] = await pool.query(
             `SELECT b.id, s.time, b.customer_name as customerName, b.haircut_style as haircutStyle, b.created_at as createdAt
              FROM bookings b JOIN slots s ON b.slot_id = s.id
              WHERE b.id = LAST_INSERT_ID()`
         );
 
-        // Emit to admin clients
         emitNewBooking(newBooking);
-
-        // Send SMS to barber
         sendBarberSMS(newBooking, bookingDate);
 
         res.status(200).json({
             message: `Booking confirmed for ${bookingDate} at ${slot.time} - ${haircutStyle}.`,
         });
     } catch (err) {
-        // Catch duplicate entry (race condition edge case)
         if (err.code === 'ER_DUP_ENTRY') {
             return res.status(400).json({ message: 'This slot was just booked by someone else.' });
         }
@@ -199,7 +184,6 @@ app.post('/api/book', async (req, res) => {
 });
 
 // GET /api/admin/bookings?date=2026-04-15
-// Returns all bookings for a given date (for the admin view)
 app.get('/api/admin/bookings', async (req, res) => {
     const { date } = req.query;
 
@@ -231,7 +215,6 @@ app.get('/api/admin/bookings', async (req, res) => {
 });
 
 // DELETE /api/admin/bookings/:id
-// Cancel a booking
 app.delete('/api/admin/bookings/:id', async (req, res) => {
     const { id } = req.params;
 
