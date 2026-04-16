@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedSlotId = null;
     let currentSlots   = [];
 
-    const PRICE_PER_PERSON = 200; // ₹ per haircut
+    const PRICE_PER_PERSON = 150; // ₹ per haircut
 
     // ── Helpers ───────────────────────────────────────────────
     const updateMessage = (message, type = '') => {
