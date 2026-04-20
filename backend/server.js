@@ -18,7 +18,15 @@ const PORT = process.env.PORT || 3000;
 const frontendPath = path.join(__dirname, '..');
 
 // ── Middleware ────────────────────────────────────────────────
-app.use(cors());
+app.use(cors({
+    origin: [
+        'https://tzbarbershop.shop',
+        'https://www.tzbarbershop.shop',
+        'http://localhost:3000',
+    ],
+    methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
+    credentials: true,
+}));
 app.use(express.json());
 app.use(express.static(frontendPath));
 
