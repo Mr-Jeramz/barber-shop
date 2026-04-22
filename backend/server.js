@@ -256,6 +256,30 @@ app.get('/about', (req, res) => {
 app.get('/admin', (req, res) => {
     res.sendFile(path.join(frontendPath, 'Admin', 'admin.html'));
 });
+// POST /api/cancel
+app.post('/api/cancel', async (req, res) => {
+    const { slotId, customerName, bookingDate } = req.body;
+
+    try {
+        const [[booking]] = await pool.query(
+            'SELECT * FROM bookings WHERE slot_id = ? AND booking_date = ?',
+            [slotId, bookingDate]
+        );
+
+        if (!booking) return res.status(404).json({ message: 'Booking not found.' });
+
+        if (booking.customer_name.toLowerCase() !== customerName.toLowerCase()) {
+            return res.status(403).json({ message: 'Name does not match the booking.' });
+        }
+
+        await pool.query('DELETE FROM bookings WHERE id = ?', [booking.id]);
+        res.json({ message: 'Booking cancelled successfully!' });
+    } catch (err) {
+        console.error('POST /api/cancel error:', err);
+        res.status(500).json({ message: 'Database error.' });
+    }
+});
+
 
 // ── Start server ──────────────────────────────────────────────
 app.listen(PORT, () => {
